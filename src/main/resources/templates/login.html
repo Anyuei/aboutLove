@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+
+</head>
+<style>
+    body {
+        background-image: url('../img/ChMkJlbKy1mIEyNgAAHlAJvm5hwAALIpgO0OE0AAeUY087.jpg');
+        no-repeat;
+        list-style: none;
+        /*去掉ui和li的 点*/
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center bottom;
+        color: #fff;
+        background-color: #333;
+        font-family: 'microsoft yahei', Arial, sans-serif;
+    }
+    .loginDiv {
+        max-width: 375px;
+        min-width: 150px;
+        margin: 70px auto auto;
+    }
+    .btn{
+        background-color: blueviolet;
+        color: azure;
+    }
+    #loadingImg{
+        display: none;
+        margin-top: 20px;
+    }
+
+</style>
+
+<body>
+    <div class="container">
+
+        <div class="loginDiv">
+            <div>${notice}</div>
+            <form onsubmit="return false" action="##" method="post">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="name" name="userName" placeholder="输入昵称">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" id="password" name="key" placeholder="输入秘钥">
+                </div>
+                <input type="button" class="btn btn-large btn-block" onclick="login()" value="Submit">
+                <div id="notice"></div>
+                <div class="text-center" id="loadingImg" >
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function login(){
+            var username = $("#name").val();
+            var password = $("#password").val();
+            $("#loadingImg").show();
+            $.ajax({
+                type: "post",
+                url: "${pageContext.request.contextPath}/user/login",
+                async: false,
+                dataType: "json",
+                data: {
+                    "userName": username,
+                    "key": password
+                },
+                success: function (data) {
+                    var result = data.result;
+                    var status = result.status;
+                    var notice = result.notice;
+                    $('#loadingImg').hide();
+
+                    if ("0"===status){
+                        window.location.href="${pageContext.request.contextPath}/user/getMessagePage"
+                    }
+                    var $input;
+                    if ("1"===status){
+                        $input = $('#name');
+                    }else if ("2"===status){
+                        $input = $('#password');
+                    }
+                    $input.val('');
+                    $input.attr('placeholder',notice);
+                },
+                error : function() {
+                    $('#loadingImg').hide();
+                    alert("异常！");
+                }
+            });
+        }
+    </script>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+</body>
+</html>

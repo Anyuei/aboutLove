@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>留言板</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../css/date.css">
+        <link rel="stylesheet" href="../css/bootstrap.min.css">
+        <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+        <script src="https://cdn.tiny.cloud/1/r7m9bnnxgb70pirtvfwkycglaiese62bmbprdg4k8pu5ziv7/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+       <script type="text/javascript" src="../js/date.js"></script>
+        <script type="text/javascript" src="../js/iscroll_date.js"></script>
+        <script>
+            $(function(){
+                //初始化日期插件
+                $('#datainput').date();
+            });
+            /*初始化文本编辑器*/
+            tinymce.init({
+                selector: '#mytextarea',
+                mobile: {
+                    menubar: true
+                }
+            });
+        </script>
+    </head>
+    <style>
+        body {
+            background-image: url('../img/紫色的海洋2560x1600.jpg');
+            no-repeat;
+            list-style: none;
+            /*去掉ui和li的 点*/
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center bottom;
+            color: #fff;
+            background-color: #333;
+            font-family: 'microsoft yahei', Arial, sans-serif;
+        }
+        .btn {
+            background-color:blueviolet;
+            color:azure;
+        }
+        .list-group-item {
+            margin-bottom: 13px;
+            border-radius: 12px;
+            background-color: #0000004d;
+            -moz-box-shadow: 2px 2px 10px #909090;
+            -webkit-box-shadow: 2px 2px 10px #909090;
+            box-shadow: 0px 0px 30px 3px #000000b5;
+        }
+        .list-group-item-action {
+            color: #fff;
+            text-align: inherit;
+        }
+        .list-group-item-action:focus, .list-group-item-action:hover {
+            z-index: 1;
+            color:#ececec;
+            text-decoration: none;
+            background-color: #e73cff2e;
+            border: 15px #0000004d;
+        }
+        #noticeArea{
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 50%;
+            top: 50%;
+            margin-left: -135px;
+            margin-top: -293px;
+            border-radius: 19px;
+        }
+        .close{
+            padding: 9px 13px 0px 0px;
+        }
+        .btn-secondary {
+
+            color: #ffffff;
+            background-color: #8a2be2d9;
+            border-color: #8a2be2;
+        }
+        .btn-secondary:hover{
+            color: #ffffff;
+            background-color: #8a2be2;
+            border-color: #8a2be2;
+        }
+        .btn-secondary:focus{
+            color: #ffffff;
+            background-color: #7928ab;
+            border-color: #8a2be2;
+        }
+        .alert-warning {
+            box-shadow: 0px 0px 14px #ce48c6;
+            color: #481e44;
+            background-color: #ff9df2;
+            border-color: #fc50ff;
+        }
+
+        .close{
+            padding: 10px 14px;
+        }
+        .alert {
+            border: 0px solid transparent;
+        }
+        #messageArea{
+            margin-top: 5px;
+        }
+        .extend{
+            padding: 9px 16px !important;
+        }
+        .buttonRight{
+            margin-left: 1rem !important;
+        }
+        .list-group-item:last-child {
+            border-bottom-right-radius: 0rem;
+            border-bottom-left-radius: 0rem;
+        }
+        .btn-group-lg > .btn, .btn-lg {
+            border-radius: 20px 20px 128px 128px;
+        }
+
+        .input-group-text {
+            padding: 5px;
+        }
+        .mb-1, .my-1 {
+            margin-bottom: 1.25rem !important;
+        }
+        .row{
+            margin-bottom: -8px;
+        }
+        .modal-content{
+            padding: 5px;
+        }
+        .viewMessageContent{
+/*            overflow: hidden;
+            white-space:nowrap;
+            text-overflow: ellipsis;*/
+            font-size: 0.7rem;
+        }
+        .viewMessageTitle{
+
+        }
+        .modal-backdrop {
+            filter: blur(10px);
+        }
+        .viewUsername{
+            color: #9960ff;
+        }
+        .viewLastLoginTime{
+            min-width: 180px;
+            font-size: 0.6rem;
+            word-break:keep-all;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .messageBottomLeft{
+            float: left;
+            margin: 15px 15px 5px 15px;
+        }
+        .messageBottomRight{
+            float: right;
+            margin: 15px 15px 5px 15px;
+        }
+    </style>
+    <body>
+    <!--顶部内容-->
+    <div class="pos-f-t">
+        <div class="collapse" id="navbarToggleExternalContent">
+            <div class="bg-dark p-4 extend">
+                <div class="row justify-content-between">
+                    <div class="col-sm-2">
+                            <h5 class="viewUsername" id="usernameArea" data-toggle="modal" data-target="#userInfoModal"><strong>${user.userName}</strong></h5>
+                            <span class="text-muted viewLastLoginTime">上次登录时间:${user.updateTime?string('yyyy.MM.dd HH:mm:ss')}</span>
+                    </div>
+                    <div class="col-sm-2" style="text-align:right">
+                        <span><a href="${pageContext.request.contextPath}/welcomePage">退出</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--修改昵称-->
+        <div class="modal fade" id="userInfoModal" tabindex="-1" role="dialog" aria-labelledby="userInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content" style="color: #cb21e3;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">修改昵称</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="needs-validation">
+                        <form>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="username" name="username" required>
+                                <div class="invalid-feedback">
+                                    昵称不能为空哟~
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="form-control btn btn-primary" onclick="editUserInfo()">确认修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="navbar navbar-dark bg-dark">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <button class="navbar-toggler buttonRight" data-toggle="modal" data-target=".bd-example-modal-lg" type="button" >
+                <span class="">留言</span>
+            </button>
+        </nav>
+    </div>
+    <!--主面板-->
+    <div class="container">
+        <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-lg">Large modal</button>-->
+        <!--<button type="button" class="btn btn-primary" onclick="reloadPage()">Large modal</button>-->
+        <!--留言板-->
+        <div id="sendMessageArea" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <form id="messageForm" method="post" onsubmit="return false" action="##">
+                        <div class="row">
+                            <!--留言日期-->
+                            <div class="col-sm-6">
+                                <div class="input-group mb-3">
+                                    <input type="text" id="messageTitleInput" name="messageTitle" class="form-control" placeholder="留言标题" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                                </div>
+                            </div>
+                            <!--留言标题-->
+                            <div class="col-sm-6">
+                                <div class="input-group-append" style="width: 100%;">
+                                    <input id="datainput" class="form-control" name="sendTime" type="text" placeholder="填写留言送达日期">
+                                    <div class="input-group-text"><img src="/iconPng/calculator.png" alt="" width="25" height="25" title="日期"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <div class="input-group date" id="show-demo-app-date-external" data-target-input="nearest">
+                                    <!--消息区-->
+                                    <div id="datePlugin"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--富文本编辑器-->
+                        <textarea id="mytextarea" placeholder="今天想说什么呢~" required="required"></textarea>
+                        <button id="submitMessage" class="btn btn-large btn-block" type="submit" onclick="sendMessage()" value="留言">写好啦 (๑•́ ₃ •̀๑)</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <!--无数据提示-->
+        <div id="noticeArea" class="alert alert-warning alert-dismissible" role="alert">
+            <strong>${user.userName}!</strong> <span id="noticeMessage">没有更多消息咯~</span>
+            <button class="close" type="button" onclick="closeNotice()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div id="messageArea">
+            <div class="list-group" id="messageList">
+                <#list messages as message>
+                    <div class="list-group-item list-group-item-action" onclick="getOneMessage('id_${message.id}')">
+
+                        <div class="d-flex w-100 justify-content-between">
+                            <strong>
+                                <div class="viewMessageTitle">${message.messageTitle}</div>
+                            </strong>
+                        </div>
+                        <div class="viewMessageContent">${message.messageContent}</div>
+                        <!--<small>发送者${message.messageTitle}</small>-->
+                        <div class="row justify-content-between">
+                            <span class="messageBottomLeft">
+                                <small><strong>${message.sendUserName}留</strong></small>
+                            </span>
+                            <span class="messageBottomRight">
+                                <small>${message.createTime?string('yyyy.MM.dd HH:mm:ss')}</small>
+                            </span>
+                        </div>
+                    </div>
+                <br>
+                </#list>
+            </div>
+            <button type="button" class="btn btn-secondary btn-lg btn-block" onclick="getData()">加载更多留言</button>
+        </div>
+        <!--单条信息详细展示-->
+        <!-- Modal -->
+        <div class="modal fade" id="singleMessageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="singleMessageTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="singleMessageContent">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+/*        $(function () {
+            $('#datetimepicker1').datetimepicker({
+                format: 'YYYY-MM-DD',
+                defaultDate: new Date()
+                /!*locale: moment.locale('zh-cn')*!/
+            });
+        });*/
+        $(document).ready(function(){
+                $("#mytextarea").focus(function(){
+                    $("#submitMessage").html("点我发送噢(..•˘_˘•..)");
+                });
+        });
+        var pageNo=2;
+        var pageSize=3;
+        function reloadPage() {
+            window.location.reload();
+        }
+        function datedifference(sDate1, sDate2) {    //sDate1和sDate2是2006-12-18格式
+            var dateSpan,
+                tempDate,
+                iDays;
+            sDate1 = Date.parse(sDate1);
+            sDate2 = Date.parse(sDate2);
+            dateSpan = sDate2 - sDate1;
+            dateSpan = Math.abs(dateSpan);
+            iDays = Math.floor(dateSpan / (24 * 3600 * 1000));
+            return iDays
+        }
+
+        function sendMessage() {
+            var messageTitle= $("#messageTitleInput").val();
+            var sendTime= $(".datainput").val();
+            var content = tinyMCE.activeEditor.getContent();  //提取富文本内容
+            if (content===''){
+                $("#submitMessage").html("佩奇摸了摸信封发现是空的噢(๑¯ิε ¯ิ๑)");
+                return false;
+            }
+            $.ajax({
+                type: "POST",//方法类型
+                dataType: "json",//预期服务器返回的数据类型
+                url: "${pageContext.request.contextPath}/message/send",//url
+                data: {
+                    messageTitle: messageTitle,
+                    sendTime: sendTime,
+                    messageContent: content
+                },
+                success: function (result) {
+                    console.log(result);//打印服务端返回的数据(调试用)
+                    if (result.code === 200) {
+                        $('#sendMessageArea').modal('hide');
+                        $('#noticeMessage').html(result.message);
+                        $('#noticeArea').css("display","block");
+                    }
+
+                },
+                error : function() {
+                    alert("异常！");
+                }
+            });
+        }
+        function editUserInfo() {
+            var username = $("#username").val();
+            if (username===''){
+                $("#username").attr('placeholder',"昵称不能为空哟~");
+                return;
+            }
+            $.ajax({
+                type: "POST",//方法类型
+                dataType: "json",//预期服务器返回的数据类型
+                url: "${pageContext.request.contextPath}/user/edit" ,//url
+                data: {
+                    userName: username
+                },
+                success: function (result) {
+                    console.log(result);//打印服务端返回的数据(调试用)
+                    if (result.code === 200) {
+                        $('#usernameArea').html("<strong>"+username+"</strong>");
+                        $('#userInfoModal').modal('hide');
+                    }else{
+                        $("#noticeMessage").html("修改失败,请检查网络");
+                        $('#noticeArea').css("display","block");
+                    }
+                },
+                error : function() {
+                    alert("异常！");
+                }
+            });
+
+        }
+        /*获取某一条留言*/
+        function getOneMessage(id) {
+            id=id.split("_")[1];
+            $.ajax({
+                type: "get",
+                url: "${pageContext.request.contextPath}/user/getOneMessage?id="+id,
+                async: false,
+                success: function (data) {
+                    if (null!=data[0]){
+                        var messageTitle= data.messageTitle;
+                        var messageContent= data.messageContent;
+                        var sendUserName = data.sendUserName;
+                        var createTime = data.createTime+"留";
+                        $("#singleMessageTitle").html(messageTitle);
+                        $("#singleMessageContent").html(messageContent);
+                        $('#singleMessageModal').modal('show');
+                    }else{
+                        $("#noticeMessage").html("啊噢,佩奇找不到此条留言了");
+                        $('#noticeArea').css("display","block");
+                    }
+                },
+                error : function() {
+                    alert("异常！");
+                }
+            });
+        }
+        /*获取留言*/
+        function getData() {
+            var html ="";
+            $.ajax({
+                type: "get",
+                url: "${pageContext.request.contextPath}/user/getMessage?pageNo="+pageNo+"&pageSize="+pageSize,
+                async: false,
+                success: function (data) {
+                    if (null!=data[0]){
+                        for(var i=0;i<data.length;i++){
+                            html+=
+                                "<div class='list-group-item list-group-item-action' onclick='getOneMessage("+data[i].id+")'>"+
+                                    "<div class='d-flex w-100 justify-content-between'>"+
+                                        "<h5 class='mb-1'>"+data[i].messageTitle+"</h5>"+
+                                    "</div>"+
+                                    "<div class='viewMessageContent'>"+data[i].messageContent+"</div>"+
+                                    "<div class='row justify-content-between'>"+
+                                        "<span class='messageBottomLeft'>"+
+                                            "<small><strong>"+data[i].sendUserName+"留</strong></small>"+
+                                        "</span>"+
+                                        "<span class='messageBottomRight'>"+
+                                            "<small>"+data[i].createTime+"</small>"+
+                                        "</span>"+
+                                    "</div>"+
+                                "</div>";
+                        }
+                        $(html).appendTo($('#messageList'));
+                        pageNo++;
+                    }else{
+                        $("#noticeMessage").html("没有更多留言咯~");
+                        $('#noticeArea').css("display","block");
+                    }
+                },
+                error : function() {
+                    alert("异常！");
+                }
+            });
+        }
+        function closeNotice(){
+            $('#noticeArea').css("display","none");
+        }
+
+    </script>
+  </body>
+</html>
